@@ -1,4 +1,4 @@
-package server;
+package com.lt.nettyServer;
 
 /**
  * @author sj

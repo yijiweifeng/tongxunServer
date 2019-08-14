@@ -1,4 +1,4 @@
-package server;
+package com.lt.nettyServer;
 
 import io.netty.channel.Channel;
 

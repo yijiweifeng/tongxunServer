@@ -1,10 +1,10 @@
-package server;
+package com.lt.nettyServer;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import server.protobuf.MessageProtobuf;
+import com.lt.nettyServer.protobuf.MessageProtobuf;
 
 /**
  * @author sj

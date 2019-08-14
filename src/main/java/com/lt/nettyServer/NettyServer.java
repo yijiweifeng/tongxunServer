@@ -1,4 +1,4 @@
-package server;
+package com.lt.nettyServer;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -10,7 +10,7 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
-import server.protobuf.MessageProtobuf;
+import com.lt.nettyServer.protobuf.MessageProtobuf;
 
 /**
  * @author sj
@@ -20,10 +20,10 @@ public class NettyServer {
 
     private int port=8855;
     private int readerIdleTimeSeconds=30;
-    NettyServer(){
+    public NettyServer(){
 
     }
-    NettyServer(int port){
+    public NettyServer(int port){
         this.port=port;
     }
     public static void main(String []args){
