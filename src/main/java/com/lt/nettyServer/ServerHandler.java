@@ -2,6 +2,7 @@ package com.lt.nettyServer;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.lt.common.utils.SpringHelper;
 import com.lt.dal.entry.NotReceivedEntity;
 import com.lt.domain.bean.JsonResult;
 import com.lt.domain.req.AddFinishSendInfoReq;
@@ -17,18 +18,20 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
  * @author sj
  * @date 2019/8/14 10:10
  */
+
+@Component
 class ServerHandler extends ChannelInboundHandlerAdapter {
     private static Logger logger = LogManager.getLogger(ServerHandler.class);
-    @Resource
-    IUserService iUserService;
+
+    IUserService iUserService = (IUserService) SpringHelper.getBean("userServiceImpl");
 
     private static final String TAG = ServerHandler.class.getSimpleName();
 

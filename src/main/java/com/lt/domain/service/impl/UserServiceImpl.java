@@ -185,7 +185,7 @@ public class UserServiceImpl implements IUserService {
         Example example =new Example(NotReceivedEntity.class);
         example.createCriteria().andEqualTo("toId",req.getId());
         List<NotReceivedEntity> notReceivedEntities = notReceivedMapper.selectByExample(example);
-        if(notReceivedEntities.size()>0){
+        if(notReceivedEntities!=null&&notReceivedEntities.size()>0){
             return JsonResult.getSuccessResult(notReceivedEntities,"获取待接收信息成功");
         }else {
             return JsonResult.getFailResult("没有待接收的信息");
