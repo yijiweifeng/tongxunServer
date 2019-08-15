@@ -35,4 +35,6 @@ public interface IUserService {
     public JsonResult addNotSendInfo(AddNotSendInfoReq req);
 
     public JsonResult addFinishSendInfo(AddFinishSendInfoReq req);
+
+    JsonResult getFriendInfoList(GetFriendInfoReq req);
 }

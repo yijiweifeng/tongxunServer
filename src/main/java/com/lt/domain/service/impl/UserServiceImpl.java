@@ -202,6 +202,15 @@ public class UserServiceImpl implements IUserService {
         return JsonResult.getFailResult("缓存消息失败");
     }
 
+    @Override
+    public JsonResult getFriendInfoList(GetFriendInfoReq req) {
+        Example example =new Example(InfoReceivedEntity.class);
+        example.createCriteria().andEqualTo("fromId",req.getUserId())
+                .andEqualTo("toId",req.getFriendId());
+        List<InfoReceivedEntity> infoReceivedEntities = infoReceivedMapper.selectByExample(example);
+        return JsonResult.getSuccessResult(infoReceivedEntities,"获取好友历史消息成功");
+    }
+
     public JsonResult addNotSendInfo(AddNotSendInfoReq req){
         NotReceivedEntity   entity =mapperUtil.map(req,NotReceivedEntity.class);
         int insert = notReceivedMapper.insert(entity);
