@@ -37,4 +37,6 @@ public interface IUserService {
     public JsonResult addFinishSendInfo(AddFinishSendInfoReq req);
 
     JsonResult getFriendInfoList(GetFriendInfoReq req);
+
+    void delNotReceidedInfoById(Long id);
 }

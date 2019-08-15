@@ -219,6 +219,9 @@ public class UserServiceImpl implements IUserService {
         }
         return JsonResult.getFailResult("缓存离线消息失败");
     }
+    public void delNotReceidedInfoById(Long id){
+        notReceivedMapper.deleteByPrimaryKey(id);
+    }
 
 
 }

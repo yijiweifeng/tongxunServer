@@ -2,6 +2,7 @@ package com.lt.nettyServer;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.lt.dal.entry.NotReceivedEntity;
 import com.lt.domain.bean.JsonResult;
 import com.lt.domain.req.AddFinishSendInfoReq;
 import com.lt.domain.req.AddNotSendInfoReq;
@@ -12,6 +13,8 @@ import com.lt.nettyServer.protobuf.MessageProtobuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,7 +34,6 @@ class ServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
         System.out.println("ServerHandler channelActive()" + ctx.channel().remoteAddress());
     }
 
@@ -71,6 +73,46 @@ class ServerHandler extends ChannelInboundHandlerAdapter {
                     resp.put("status", 1);
                     // 握手成功后，保存用户通道
                     ChannelContainer.getInstance().saveChannel(new NettyChannel(fromId, ctx.channel()));
+
+                    // 推送待接收消息
+                    CommonReq req =new CommonReq();
+                    req.setId(Long.parseLong(fromId));
+                    JsonResult result = iUserService.getNotReceiveInfoByUserId(req);
+                    if("200".equals(result.getResult())){
+                        List<NotReceivedEntity> notReceList = (List<NotReceivedEntity>) result.getData();
+                        for(NotReceivedEntity n:notReceList){
+                            MessageProtobuf.Msg.Builder sentReportMsgBuilder = MessageProtobuf.Msg.newBuilder();
+                            MessageProtobuf.Head.Builder sentReportHeadBuilder = MessageProtobuf.Head.newBuilder();
+                            sentReportHeadBuilder.setMsgId(n.getInfoId());
+                            sentReportHeadBuilder.setFromId(n.getToId()+"");
+                            sentReportHeadBuilder.setToId(fromId);
+                            // 消息类型 待接收
+                            sentReportHeadBuilder.setMsgType(2010);
+                            sentReportHeadBuilder.setMsgContentType(1);
+                            sentReportHeadBuilder.setTimestamp(System.currentTimeMillis());
+                            sentReportHeadBuilder.setStatusReport(1);
+                            sentReportMsgBuilder.setHead(sentReportHeadBuilder.build());
+                            sentReportMsgBuilder.setBody(n.getContent());
+                            ChannelFuture channelFuture = ChannelContainer.getInstance().getActiveChannelByUserId(fromId).getChannel().writeAndFlush(sentReportMsgBuilder.build());
+                            channelFuture.addListener(new GenericFutureListener<Future<? super Void>>() {
+                                @Override
+                                public void operationComplete(Future<? super Void> future) throws Exception {
+                                    if(future.isSuccess()){
+                                        // 推送待接收消息后删除待接收信息
+                                        iUserService.delNotReceidedInfoById(n.getId());
+                                    }
+                                    logger.info("转发待接收"+future.isSuccess());
+                                }
+                            });
+                        }
+
+
+
+
+                    }
+
+
+
                 } else {
                     resp.put("status", -1);
                     ChannelContainer.getInstance().removeChannelIfConnectNoActive(ctx.channel());
@@ -115,7 +157,7 @@ class ServerHandler extends ChannelInboundHandlerAdapter {
                 addFinishSendInfoReq.setReceiveTime(System.currentTimeMillis()+"");
                 addFinishSendInfoReq.setContentType(message.getHead().getMsgType());
                 addFinishSendInfoReq.setUploadUrl("/");
-                iUserService.addFinishSendInfo(addFinishSendInfoReq);
+
 
                 if(nettyChannel==null){
                     // 缓存离线消息
@@ -127,11 +169,21 @@ class ServerHandler extends ChannelInboundHandlerAdapter {
                     addNotSendInfoReq.setSendTime(message.getHead().getTimestamp()+"");
                     addNotSendInfoReq.setContentType(message.getHead().getMsgType());
                     addNotSendInfoReq.setUploadUrl("/");
+                    iUserService.addFinishSendInfo(addFinishSendInfoReq);
                     iUserService.addNotSendInfo(addNotSendInfoReq);
                     logger.info(toId+"不在线 缓存离线消息");
                 }else {
                     ChannelFuture channelFuture = nettyChannel.getChannel().writeAndFlush(message);
-                    logger.info(toId+"在线 转发成功 缓存消息");
+                    channelFuture.addListener(new GenericFutureListener<Future<? super Void>>() {
+                        @Override
+                        public void operationComplete(Future<? super Void> future) throws Exception {
+                            if(future.isSuccess()){
+                                iUserService.addFinishSendInfo(addFinishSendInfoReq);
+                            }
+                            logger.info(toId+"在线 转发成功 缓存消息"+future.isSuccess());
+                        }
+                    });
+
                 }
 
                 break;
