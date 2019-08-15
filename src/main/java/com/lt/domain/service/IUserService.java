@@ -2,8 +2,7 @@ package com.lt.domain.service;
 
 import com.lt.dal.entry.UserEntity;
 import com.lt.domain.bean.JsonResult;
-import com.lt.domain.req.LoginReq;
-import com.lt.domain.req.RegiserReq;
+import com.lt.domain.req.*;
 
 
 /**
@@ -16,4 +15,24 @@ public interface IUserService {
     JsonResult login(LoginReq req);
 
     JsonResult regiser(RegiserReq req);
+
+    JsonResult addFriend(AddFriendReq req);
+
+    JsonResult getFriendList(CommonReq req);
+
+    JsonResult addGroup(AddGroupReq req);
+
+    JsonResult getMyCreateGroup(CommonReq req);
+
+    JsonResult getMyJoinGroup(CommonReq req);
+
+    JsonResult joinGroup(JoinGroupReq req);
+
+    JsonResult getGroupFreidList(CommonReq req);
+
+    JsonResult getNotReceiveInfoByUserId(CommonReq req);
+
+    public JsonResult addNotSendInfo(AddNotSendInfoReq req);
+
+    public JsonResult addFinishSendInfo(AddFinishSendInfoReq req);
 }

@@ -1,20 +1,33 @@
 package com.lt.dal.entry;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.io.Serializable;
+
 /**
  * @author sj
  * @date 2019/8/14 13:01
  */
-public class UserEntity {
-    private long id;
+@Entity
+@Table(name = "user_info")
+public class UserEntity  implements Serializable {
+    @Id
+    @Column(name = "id")
+    private Long id;
+    @Column(name = "name")
     private String name;
-    private long tel;
+    @Column(name = "tel")
+    private Long tel;
+    @Column(name = "password")
     private String password;
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -26,11 +39,11 @@ public class UserEntity {
         this.name = name;
     }
 
-    public long getTel() {
+    public Long getTel() {
         return tel;
     }
 
-    public void setTel(long tel) {
+    public void setTel(Long tel) {
         this.tel = tel;
     }
 

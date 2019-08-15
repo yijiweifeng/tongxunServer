@@ -1,11 +1,11 @@
 package com.lt;
 
 import com.lt.nettyServer.NettyServer;
-import org.mybatis.spring.annotation.MapperScan;
+import tk.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@MapperScan("com.lt.dal.mapper")
+@MapperScan(basePackages = "com.lt.dal.mapper")
 @SpringBootApplication
 public class Application {
 

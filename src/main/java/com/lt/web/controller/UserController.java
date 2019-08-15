@@ -1,8 +1,7 @@
 package com.lt.web.controller;
 
 import com.lt.domain.bean.JsonResult;
-import com.lt.domain.req.LoginReq;
-import com.lt.domain.req.RegiserReq;
+import com.lt.domain.req.*;
 import com.lt.domain.service.IUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,7 +22,7 @@ public class UserController {
     @Resource
     IUserService iUserService;
 
-    @ApiOperation(value = "好友列表", notes = "")
+    @ApiOperation(value = "所有用户列表", notes = "")
     @RequestMapping(value = "get_user_list",method = RequestMethod.GET)
     public JsonResult getUserListById(){
 
@@ -42,5 +41,78 @@ public class UserController {
 
         return  iUserService.regiser(req);
     }
+
+    @ApiOperation(value = "添加好友", notes = "")
+    @RequestMapping(value = "add_friend",method = RequestMethod.POST)
+    public JsonResult addFriend(AddFriendReq req){
+
+        return  iUserService.addFriend(req);
+    }
+
+    @ApiOperation(value = "获取好友列表 通过用户id", notes = "")
+    @RequestMapping(value = "get_friend_list",method = RequestMethod.POST)
+    public JsonResult getFriendList(CommonReq req){
+
+        return  iUserService.getFriendList(req);
+    }
+
+    @ApiOperation(value = "创建群", notes = "")
+    @RequestMapping(value = "add_group",method = RequestMethod.POST)
+    public JsonResult addGroup(AddGroupReq req){
+
+        return  iUserService.addGroup(req);
+    }
+
+    @ApiOperation(value = "加入群 通过群id", notes = "")
+    @RequestMapping(value = "join_group ",method = RequestMethod.POST)
+    public JsonResult joinGroup(JoinGroupReq req){
+
+        return  iUserService.joinGroup(req);
+    }
+
+    @ApiOperation(value = "获取我创建的群列表 通过用户id", notes = "")
+    @RequestMapping(value = "get_my_cteate_group_list",method = RequestMethod.POST)
+    public JsonResult getMyCreateGroup(CommonReq req){
+
+        return  iUserService.getMyCreateGroup(req);
+    }
+
+    @ApiOperation(value = "获取我加入的群列表 通过用户id", notes = "")
+    @RequestMapping(value = "get_my_join_group_list",method = RequestMethod.POST)
+    public JsonResult getMyJoinGroup(CommonReq req){
+
+        return  iUserService.getMyJoinGroup(req);
+    }
+
+    @ApiOperation(value = "获取某个群内的用户列表 通过群id", notes = "")
+    @RequestMapping(value = "get_group_friend_list",method = RequestMethod.POST)
+    public JsonResult getGroupFreidList(CommonReq req){
+
+        return  iUserService.getGroupFreidList(req);
+    }
+
+    @ApiOperation(value = "获取待接收信息列表 通过用户id", notes = "")
+    @RequestMapping(value = "get_not_received_list",method = RequestMethod.POST)
+    public JsonResult getNotReceivedInfoList(CommonReq req){
+
+        return  iUserService.getNotReceiveInfoByUserId(req);
+    }
+
+    @ApiOperation(value = "以发消息入库 ", notes = "")
+    @RequestMapping(value = "add_finish_info",method = RequestMethod.POST)
+    public JsonResult addFinishSendInfo(AddFinishSendInfoReq req){
+
+        return  iUserService.addFinishSendInfo(req);
+    }
+    @ApiOperation(value = "离线消息入库 ", notes = "")
+    @RequestMapping(value = "add_not_received_info",method = RequestMethod.POST)
+    public JsonResult addNotSendInfo(AddNotSendInfoReq req){
+        return iUserService.addNotSendInfo(req);
+    }
+
+
+
+
+
 
 }
