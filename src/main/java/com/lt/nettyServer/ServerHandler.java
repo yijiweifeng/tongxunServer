@@ -2,15 +2,30 @@ package com.lt.nettyServer;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.lt.domain.bean.JsonResult;
+import com.lt.domain.req.AddFinishSendInfoReq;
+import com.lt.domain.req.AddNotSendInfoReq;
+import com.lt.domain.req.CommonReq;
+import com.lt.domain.resq.UserResq;
+import com.lt.domain.service.IUserService;
+import com.lt.nettyServer.protobuf.MessageProtobuf;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import com.lt.nettyServer.protobuf.MessageProtobuf;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author sj
  * @date 2019/8/14 10:10
  */
 class ServerHandler extends ChannelInboundHandlerAdapter {
+    private static Logger logger = LogManager.getLogger(ServerHandler.class);
+    @Resource
+    IUserService iUserService;
 
     private static final String TAG = ServerHandler.class.getSimpleName();
 
@@ -88,12 +103,59 @@ class ServerHandler extends ChannelInboundHandlerAdapter {
 
                 // 同时转发消息到接收方
                 String toId = message.getHead().getToId();
-                ChannelContainer.getInstance().getActiveChannelByUserId(toId).getChannel().writeAndFlush(message);
+                NettyChannel nettyChannel = ChannelContainer.getInstance().getActiveChannelByUserId(toId);
+
+                // 缓存消息
+                AddFinishSendInfoReq addFinishSendInfoReq=new AddFinishSendInfoReq();
+                addFinishSendInfoReq.setInfoId(message.getHead().getMsgId());
+                addFinishSendInfoReq.setFromId(Long.parseLong(fromId));
+                addFinishSendInfoReq.setToId(Long.parseLong(toId));
+                addFinishSendInfoReq.setContent(message.getBody());
+                addFinishSendInfoReq.setSendTime(message.getHead().getTimestamp()+"");
+                addFinishSendInfoReq.setReceiveTime(System.currentTimeMillis()+"");
+                addFinishSendInfoReq.setContentType(message.getHead().getMsgType());
+                addFinishSendInfoReq.setUploadUrl("/");
+                iUserService.addFinishSendInfo(addFinishSendInfoReq);
+
+                if(nettyChannel==null){
+                    // 缓存离线消息
+                    AddNotSendInfoReq addNotSendInfoReq=new AddNotSendInfoReq();
+                    addNotSendInfoReq.setInfoId(message.getHead().getMsgId());
+                    addNotSendInfoReq.setFromId(Long.parseLong(fromId));
+                    addNotSendInfoReq.setToId(Long.parseLong(toId));
+                    addNotSendInfoReq.setContent(message.getBody());
+                    addNotSendInfoReq.setSendTime(message.getHead().getTimestamp()+"");
+                    addNotSendInfoReq.setContentType(message.getHead().getMsgType());
+                    addNotSendInfoReq.setUploadUrl("/");
+                    iUserService.addNotSendInfo(addNotSendInfoReq);
+                    logger.info(toId+"不在线 缓存离线消息");
+                }else {
+                    ChannelFuture channelFuture = nettyChannel.getChannel().writeAndFlush(message);
+                    logger.info(toId+"在线 转发成功 缓存消息");
+                }
+
                 break;
             }
 
             case 3001: {
                 // todo 群聊，自己实现吧，toId可以是群id，根据群id查找所有在线用户的id，循环遍历channel发送即可。
+                String fromId = message.getHead().getFromId();
+                String toId = message.getHead().getToId();
+                CommonReq req =new CommonReq();
+                req.setId(Long.parseLong(toId));
+                JsonResult groupFreidList = iUserService.getGroupFreidList(req);
+                List<UserResq> friendlist= (List<UserResq>) groupFreidList.getData();
+
+                for (UserResq u:friendlist){
+                    NettyChannel nettyChannel = ChannelContainer.getInstance().getActiveChannelByUserId(u.getId()+"");
+                    if (nettyChannel==null){
+                        logger.info(toId+"不在线 群发");
+                    }else {
+                         nettyChannel.getChannel().writeAndFlush(message);
+                         logger.info(toId+"在线 转发成功 群发");
+                    }
+                }
+
                 break;
             }
 
