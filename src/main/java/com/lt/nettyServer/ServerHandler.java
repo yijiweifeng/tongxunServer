@@ -83,7 +83,7 @@ class ServerHandler extends ChannelInboundHandlerAdapter {
                     JsonResult result = iUserService.getNotReceiveInfoByUserId(req);
                     if("200".equals(result.getResult())){
                         List<NotReceivedEntity> notReceList = (List<NotReceivedEntity>) result.getData();
-                        for(NotReceivedEntity n:notReceList){
+                        for(final NotReceivedEntity n:notReceList){
                             MessageProtobuf.Msg.Builder sentReportMsgBuilder = MessageProtobuf.Msg.newBuilder();
                             MessageProtobuf.Head.Builder sentReportHeadBuilder = MessageProtobuf.Head.newBuilder();
                             sentReportHeadBuilder.setMsgId(n.getInfoId());
@@ -147,11 +147,11 @@ class ServerHandler extends ChannelInboundHandlerAdapter {
                 ChannelContainer.getInstance().getActiveChannelByUserId(fromId).getChannel().writeAndFlush(sentReportMsgBuilder.build());
 
                 // 同时转发消息到接收方
-                String toId = message.getHead().getToId();
+                final String toId = message.getHead().getToId();
                 NettyChannel nettyChannel = ChannelContainer.getInstance().getActiveChannelByUserId(toId);
 
                 // 缓存消息
-                AddFinishSendInfoReq addFinishSendInfoReq=new AddFinishSendInfoReq();
+                final AddFinishSendInfoReq addFinishSendInfoReq=new AddFinishSendInfoReq();
                 addFinishSendInfoReq.setInfoId(message.getHead().getMsgId());
                 addFinishSendInfoReq.setFromId(Long.parseLong(fromId));
                 addFinishSendInfoReq.setToId(Long.parseLong(toId));
