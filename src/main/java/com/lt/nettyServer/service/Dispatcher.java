@@ -276,6 +276,9 @@ public class Dispatcher {
                 public void operationComplete(Future<? super Void> future) throws Exception {
                     if(future.isSuccess()){
                         iUserService.addFinishSendInfo(addFinishSendInfoReq);
+                        // 响应客户端转发成功
+                        responseClient(message, MessageType.StatusReportEnum.SUCCESS_1.getTypeCode()
+                                ,MessageType.SERVER_MSG_SENT_STATUS_REPORT.getMsgType());
                         logger.info(toId+"在线 转发成功 缓存消息"+future.isSuccess());
                     }else {
                         ChannelContainer.getInstance().getActiveChannelByUserId(toId)
@@ -312,15 +315,18 @@ public class Dispatcher {
         sentReportHeadBuilder.setTimestamp(System.currentTimeMillis());
         sentReportHeadBuilder.setStatusReport(status);
         sentReportMsgBuilder.setHead(sentReportHeadBuilder.build());
-        ChannelContainer.getInstance().getActiveChannelByUserId(fromId)
-                .getChannel().writeAndFlush(sentReportMsgBuilder.build())
-                .addListener(new GenericFutureListener<Future<? super Void>>() {
-                    @Override
-                    public void operationComplete(Future<? super Void> future) throws Exception {
-                        if(!future.isSuccess()){
-                            responseClient(message,status,msgType);
+        NettyChannel activeChannelByUserId = ChannelContainer.getInstance().getActiveChannelByUserId(fromId);
+        if(activeChannelByUserId!=null){
+            activeChannelByUserId.getChannel().writeAndFlush(sentReportMsgBuilder.build())
+                    .addListener(new GenericFutureListener<Future<? super Void>>() {
+                        @Override
+                        public void operationComplete(Future<? super Void> future) throws Exception {
+                            if(!future.isSuccess()){
+                                responseClient(message,status,msgType);
+                            }
                         }
-                    }
-                });
+                    });
+        }
+
     }
 }
