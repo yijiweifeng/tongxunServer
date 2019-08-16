@@ -82,13 +82,14 @@ public class UserServiceImpl implements IUserService {
             userEntity.setTel( Long.valueOf(req.getTel()));
             userEntity.setPassword(req.getPassword());
             userMapper.insertSelective(userEntity);
+            List<UserEntity> select = userMapper.select(userEntity);
+            return JsonResult.getSuccessResult(select.get(0),"注册成功,请登录!");
         }catch (Exception e){
             e.printStackTrace();
             logger.error("注册发生错误！");
-            return JsonResult.getFailResult("注册失败!");
-        }
 
-        return JsonResult.getSuccessResult("注册成功,请登录!");
+        }
+        return JsonResult.getFailResult("注册失败!");
     }
 
     @Override
