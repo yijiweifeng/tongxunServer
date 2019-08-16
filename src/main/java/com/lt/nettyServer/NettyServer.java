@@ -1,5 +1,7 @@
 package com.lt.nettyServer;
 
+import com.lt.nettyServer.protobuf.MessageProtobuf;
+import com.lt.nettyServer.service.Service;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -10,7 +12,6 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
-import com.lt.nettyServer.protobuf.MessageProtobuf;
 
 /**
  * @author sj
@@ -32,6 +33,8 @@ public class NettyServer {
     }
 
     public  void startServer() {
+
+
 
         //boss线程监听端口，worker线程负责数据读写
         EventLoopGroup boss = new NioEventLoopGroup();
@@ -73,7 +76,10 @@ public class NettyServer {
             //绑定端口
             ChannelFuture future = bootstrap.bind(port).sync();
             if(future.isSuccess()){
-                System.out.println("server start success...... 端口"+port);
+                // 启动队列任务服务
+                new Service().initAndStart();
+                System.out.println("队列任务服务 start success...... ");
+                System.out.println("IM Netty start success...... 端口"+port);
             }else {
                 System.out.println("server start fail.....");
             }

@@ -67,6 +67,7 @@ public class UserServiceImpl implements IUserService {
         if(userlist.size()>1){
             logger.error("账号异常"+req.getTel());
         }
+        userlist.get(0).setPassword(null);
         return JsonResult.getSuccessResult(userlist.get(0),"登录成功!");
 
 
