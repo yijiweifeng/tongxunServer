@@ -24,14 +24,15 @@ public enum MessageType {
     HEARTBEAT(1002),
 
     /*
-     * 客户端提交的消息接收状态报告
+     * 客户端提交的消息接收状态报告 不要了
      */
     CLIENT_MSG_RECEIVED_STATUS_REPORT(1009),
 
     /*
-     * 服务端返回的消息发送状态报告
+     * 服务端返回的消息发送状态报告  消息状态statusReport 0:发送失败 1：发送成功
      */
     SERVER_MSG_SENT_STATUS_REPORT(1010),
+
 
     /**
      * 单聊消息
@@ -89,6 +90,34 @@ public enum MessageType {
 
         public int getMsgContentType() {
             return this.msgContentType;
+        }
+    }
+
+    public enum StatusReportEnum {
+
+        /**
+         * 消息转发失败
+         */
+        FAIL(0),
+
+        /**
+         * 消息转发成功
+         */
+        SUCCESS_1(1),
+
+        /**
+         * 消息转发成功 离线消息
+         */
+        SUCCESS_2(2);
+
+        private int statusReport;
+
+        StatusReportEnum(int msgContentType) {
+            this.statusReport = msgContentType;
+        }
+
+        public int getTypeCode() {
+            return this.statusReport;
         }
     }
 }

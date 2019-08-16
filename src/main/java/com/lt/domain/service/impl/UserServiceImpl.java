@@ -75,6 +75,12 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public JsonResult regiser(RegiserReq req) {
+        Example example = new Example(UserEntity.class);
+        example.createCriteria().andEqualTo("tel",req.getTel());
+        List<UserEntity> userEntities = userMapper.selectByExample(example);
+        if(userEntities!=null&&userEntities.size()>0){
+            return JsonResult.getFailResult("注册失败,该手机号已经注册");
+        }
 
         try {
             UserEntity  userEntity =new UserEntity();
@@ -107,12 +113,19 @@ public class UserServiceImpl implements IUserService {
         friendEntity.setFriendId(req.getFriendId());
         int i = goodFriendMapper.insertSelective(friendEntity);
         if(i>0){
-            friendEntity.setUserId(req.getFriendId());
-            friendEntity.setFriendId(req.getId());
-            i = goodFriendMapper.insertSelective(friendEntity);
-            if(i>0){
-                return JsonResult.getSuccessResult("添加成功");
+
+            Example example2 = new Example(GoodFriendEntity.class);
+            Example.Criteria criteria2 = example2.createCriteria();
+            criteria2.andEqualTo("userId",req.getFriendId());
+            criteria2.andEqualTo("friendId",req.getId());
+            List<GoodFriendEntity> goodFriendEntities2 = goodFriendMapper.selectByExample(example2);
+            if(CollectionUtils.isEmpty(goodFriendEntities2)){
+                friendEntity.setUserId(req.getFriendId());
+                friendEntity.setFriendId(req.getId());
+                i = goodFriendMapper.insertSelective(friendEntity);
             }
+            return JsonResult.getSuccessResult("添加成功");
+
         }
 
         return JsonResult.getFailResult("添加失败");

@@ -43,11 +43,15 @@ class ServerHandler extends ChannelInboundHandlerAdapter {
         // 用户断开连接后，移除channel
         ChannelContainer.getInstance().removeChannelIfConnectNoActive(ctx.channel());
         System.out.println("channel size :"+ChannelContainer.getInstance().channelSize());
+        if (ctx != null) {
+            ctx.close();
+        }
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        super.exceptionCaught(ctx, cause);
+       // super.exceptionCaught(ctx, cause);
+        logger.error("异常消息"+cause);
         System.out.println("ServerHandler exceptionCaught()");
     }
 
@@ -60,20 +64,26 @@ class ServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         total++;
-        MessageProtobuf.Msg message = (MessageProtobuf.Msg) msg;
-        System.out.println("channel size :"+ChannelContainer.getInstance().channelSize());
-        System.out.println("收到来自客户端的消息：" + message);
-        System.out.println("处理消息数：" + total);
-        MessageHolder  messageHolder =new MessageHolder();
-        messageHolder.setChannel(ctx.channel());
-        messageHolder.setMsg(message);
-        // 添加到任务队列
-        boolean offer = taskQueue.offer(messageHolder);
-        logger.info("TaskQueue添加任务: taskQueue=" + taskQueue.size());
-        if (!offer) {
-            // 服务器繁忙
-            logger.warn("服务器繁忙，拒绝服务");
-            // 繁忙响应
+        try {
+            MessageProtobuf.Msg message = (MessageProtobuf.Msg) msg;
+            System.out.println("channel size :"+ChannelContainer.getInstance().channelSize());
+            System.out.println("收到来自客户端的消息：" + message);
+            System.out.println("处理消息数：" + total);
+            MessageHolder  messageHolder =new MessageHolder();
+            messageHolder.setChannel(ctx.channel());
+            messageHolder.setMsg(message);
+            // 添加到任务队列
+            boolean offer = taskQueue.offer(messageHolder);
+            logger.info("TaskQueue添加任务: taskQueue=" + taskQueue.size());
+            if (!offer) {
+                // 服务器繁忙
+                logger.warn("服务器繁忙，拒绝服务");
+                // 繁忙响应
+            }
+        }catch (Exception e){
+            logger.error("接收消息异常"+msg);
         }
+
+
     }
 }

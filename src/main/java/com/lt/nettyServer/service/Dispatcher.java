@@ -60,7 +60,7 @@ public class Dispatcher {
                     ChannelContainer.getInstance().removeChannelIfConnectNoActive(channel);
                     // 响应握手
                     message = message.toBuilder().setHead(message.getHead().toBuilder().setExtend(resp.toString()).build()).build();
-                    ChannelContainer.getInstance().getActiveChannelByUserId(fromId).getChannel().writeAndFlush(message);
+                    channel.writeAndFlush(message);
                 }
                 break;
             }
@@ -101,6 +101,11 @@ public class Dispatcher {
         req.setId(Long.parseLong(toId));
         JsonResult groupFreidList = iUserService.getGroupFreidList(req);
         List<UserResq> friendlist= (List<UserResq>) groupFreidList.getData();
+
+        // 通知客户端发送成功 不管在线不在线
+        responseClient(message, MessageType.StatusReportEnum.SUCCESS_1.getTypeCode()
+                ,MessageType.SERVER_MSG_SENT_STATUS_REPORT.getMsgType());
+
         if(friendlist!=null&&friendlist.size()>0){
 
             // 缓存消息
@@ -133,9 +138,8 @@ public class Dispatcher {
                         addNotSendInfoReq.setUploadUrl("/");
                         addNotSendInfoReq.setInfoType(1);
                         addNotSendInfoReq.setGroupId(Long.parseLong(toId));
-                        //iUserService.addFinishSendInfo(addFinishSendInfoReq);
                         iUserService.addNotSendInfo(addNotSendInfoReq);
-                        logger.info(u.getId()+"不在线 群发");
+                        logger.info(u.getId()+"不在线  群发 离线缓存");
                     }else {
                         nettyChannel.getChannel().writeAndFlush(message)
                                 .addListener(new GenericFutureListener<Future<? super Void>>() {
@@ -231,16 +235,6 @@ public class Dispatcher {
     // 单聊消息
     public void sendPersonalInfo(MessageProtobuf.Msg message){
         String fromId = message.getHead().getFromId();
-        // 发送给客户端表示服务端已经接收1009
-        MessageProtobuf.Msg.Builder sentReportMsgBuilder = MessageProtobuf.Msg.newBuilder();
-        MessageProtobuf.Head.Builder sentReportHeadBuilder = MessageProtobuf.Head.newBuilder();
-        sentReportHeadBuilder.setMsgId(message.getHead().getMsgId());
-        sentReportHeadBuilder.setMsgType(MessageType.CLIENT_MSG_RECEIVED_STATUS_REPORT.getMsgType());
-        sentReportHeadBuilder.setTimestamp(System.currentTimeMillis());
-        sentReportHeadBuilder.setStatusReport(1);
-        sentReportMsgBuilder.setHead(sentReportHeadBuilder.build());
-        ChannelContainer.getInstance().getActiveChannelByUserId(fromId).getChannel().writeAndFlush(sentReportMsgBuilder.build());
-
         // 同时转发消息到接收方
         String toId = message.getHead().getToId();
         NettyChannel nettyChannel = ChannelContainer.getInstance().getActiveChannelByUserId(toId);
@@ -272,6 +266,8 @@ public class Dispatcher {
             iUserService.addFinishSendInfo(addFinishSendInfoReq);
             iUserService.addNotSendInfo(addNotSendInfoReq);
             logger.info(toId+"不在线 缓存离线消息");
+            responseClient(message,MessageType.StatusReportEnum.SUCCESS_1.getTypeCode()
+                    ,MessageType.SERVER_MSG_SENT_STATUS_REPORT.getMsgType());
         }else {
             // 在线 发送消息成功后缓存消息
             ChannelFuture channelFuture = nettyChannel.getChannel().writeAndFlush(message);
@@ -290,7 +286,11 @@ public class Dispatcher {
                                         if(future.isSuccess()){
                                             iUserService.addFinishSendInfo(addFinishSendInfoReq);
                                             // 响应客户端转发成功
-                                            responseClient(message);
+                                            responseClient(message, MessageType.StatusReportEnum.SUCCESS_1.getTypeCode()
+                                                    ,MessageType.SERVER_MSG_SENT_STATUS_REPORT.getMsgType());
+                                        }else {
+                                            responseClient(message, MessageType.StatusReportEnum.FAIL.getTypeCode()
+                                                    ,MessageType.SERVER_MSG_SENT_STATUS_REPORT.getMsgType());
                                         }
                                         logger.info(toId+"在线 转发成功 缓存消息"+future.isSuccess());
                                     }
@@ -303,14 +303,14 @@ public class Dispatcher {
         }
     }
 
-    public void responseClient( MessageProtobuf.Msg message){
+    public void responseClient( MessageProtobuf.Msg message,int status,int msgType){
         String fromId = message.getHead().getFromId();
         MessageProtobuf.Msg.Builder sentReportMsgBuilder = MessageProtobuf.Msg.newBuilder();
         MessageProtobuf.Head.Builder sentReportHeadBuilder = MessageProtobuf.Head.newBuilder();
         sentReportHeadBuilder.setMsgId(message.getHead().getMsgId());
-        sentReportHeadBuilder.setMsgType(MessageType.SERVER_MSG_SENT_STATUS_REPORT.getMsgType());
+        sentReportHeadBuilder.setMsgType(msgType);
         sentReportHeadBuilder.setTimestamp(System.currentTimeMillis());
-        sentReportHeadBuilder.setStatusReport(1);
+        sentReportHeadBuilder.setStatusReport(status);
         sentReportMsgBuilder.setHead(sentReportHeadBuilder.build());
         ChannelContainer.getInstance().getActiveChannelByUserId(fromId)
                 .getChannel().writeAndFlush(sentReportMsgBuilder.build())
@@ -318,7 +318,7 @@ public class Dispatcher {
                     @Override
                     public void operationComplete(Future<? super Void> future) throws Exception {
                         if(!future.isSuccess()){
-                            responseClient(message);
+                            responseClient(message,status,msgType);
                         }
                     }
                 });
