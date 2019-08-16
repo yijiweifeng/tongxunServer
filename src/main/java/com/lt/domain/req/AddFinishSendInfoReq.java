@@ -15,6 +15,24 @@ public class AddFinishSendInfoReq implements Serializable {
     private String content;
     private Integer contentType;
     private String uploadUrl;
+    private Integer infoType;
+    private Long groupId;
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
+    public Integer getInfoType() {
+        return infoType;
+    }
+
+    public void setInfoType(Integer infoType) {
+        this.infoType = infoType;
+    }
 
     public String getInfoId() {
         return infoId;

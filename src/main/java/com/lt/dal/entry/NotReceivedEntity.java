@@ -30,6 +30,26 @@ public class NotReceivedEntity implements Serializable {
     private Integer contentType;
     @Column(name = "upload_url")
     private String uploadUrl;
+    @Column(name = "info_type")
+    private Integer infoType;
+    @Column(name = "group_id")
+    private Long groupId;
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
+    public Integer getInfoType() {
+        return infoType;
+    }
+
+    public void setInfoType(Integer infoType) {
+        this.infoType = infoType;
+    }
 
     public String getSendTime() {
         return sendTime;

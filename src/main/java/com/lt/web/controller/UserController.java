@@ -110,10 +110,10 @@ public class UserController {
         return iUserService.addNotSendInfo(req);
     }
 
-    @ApiOperation(value = "获取某个好友历史消息 by用户id和对方id ", notes = "")
+    @ApiOperation(value = "获取某个历史消息 by用户id和好友id/群id ", notes = "")
     @RequestMapping(value = "get_friend_info_list",method = RequestMethod.POST)
-    public JsonResult getFriendInfoList(GetFriendInfoReq req){
-        return iUserService.getFriendInfoList(req);
+    public JsonResult getHistoryInfoList(GetHistoryInfoReq req){
+        return iUserService.getHistoryInfoList(req);
     }
 
 

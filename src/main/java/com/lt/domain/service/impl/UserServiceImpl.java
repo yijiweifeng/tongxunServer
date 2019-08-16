@@ -15,7 +15,9 @@ import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author sj
@@ -203,12 +205,35 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public JsonResult getFriendInfoList(GetFriendInfoReq req) {
-        Example example =new Example(InfoReceivedEntity.class);
-        example.createCriteria().andEqualTo("fromId",req.getUserId())
-                .andEqualTo("toId",req.getFriendId());
-        List<InfoReceivedEntity> infoReceivedEntities = infoReceivedMapper.selectByExample(example);
-        return JsonResult.getSuccessResult(infoReceivedEntities,"获取好友历史消息成功");
+    public JsonResult getHistoryInfoList(GetHistoryInfoReq req) {
+
+        Map<String ,List<InfoReceivedEntity>> result=new HashMap<>() ;
+
+        if(req.getInfoType()==1){
+            Example example =new Example(InfoReceivedEntity.class);
+            example.createCriteria().andEqualTo("fromId",req.getUserId())
+                    .andEqualTo("toId",req.getFriendOrGroupId())
+                    .andEqualTo("infoType",1);
+            List<InfoReceivedEntity> mySendList = infoReceivedMapper.selectByExample(example);
+
+            Example example2 =new Example(InfoReceivedEntity.class);
+            example2.createCriteria().andEqualTo("fromId",req.getFriendOrGroupId())
+                    .andEqualTo("toId",req.getUserId())
+                    .andEqualTo("infoType",1);
+            List<InfoReceivedEntity> myreceivedList = infoReceivedMapper.selectByExample(example2);
+            result.put("mySendList",mySendList);
+            result.put("myReceivedList",myreceivedList);
+        }else  if(req.getInfoType()==2){
+            Example example =new Example(InfoReceivedEntity.class);
+            example.createCriteria()
+                    .andEqualTo("groupId",req.getFriendOrGroupId())
+                    .andEqualTo("infoType",2);
+            List<InfoReceivedEntity> groupInfo = infoReceivedMapper.selectByExample(example);
+
+            result.put("groupInfo",groupInfo);
+        }
+
+        return JsonResult.getSuccessResult(result,"获取好友历史消息成功");
     }
 
     public JsonResult addNotSendInfo(AddNotSendInfoReq req){
