@@ -78,7 +78,7 @@ public class UserServiceImpl implements IUserService {
         try {
             UserEntity  userEntity =new UserEntity();
             userEntity.setName(req.getName());
-            userEntity.setTel( Long.parseLong(req.getTel()));
+            userEntity.setTel( Long.valueOf(req.getTel()));
             userEntity.setPassword(req.getPassword());
             userMapper.insertSelective(userEntity);
         }catch (Exception e){
@@ -105,7 +105,12 @@ public class UserServiceImpl implements IUserService {
         friendEntity.setFriendId(req.getFriendId());
         int i = goodFriendMapper.insertSelective(friendEntity);
         if(i>0){
-            return JsonResult.getSuccessResult("添加成功");
+            friendEntity.setUserId(req.getFriendId());
+            friendEntity.setFriendId(req.getId());
+            i = goodFriendMapper.insertSelective(friendEntity);
+            if(i>0){
+                return JsonResult.getSuccessResult("添加成功");
+            }
         }
 
         return JsonResult.getFailResult("添加失败");
