@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lt.dal.mapper.ext.UserMapperExt">
+    <resultMap id="BaseResultMap" type="com.lt.dal.entry.UserEntity">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="password" property="password"/>
+        <result column="tel" property="tel"/>
+    </resultMap>
+
+    <resultMap id="GroupResultMap" type="com.lt.dal.entry.GroupEntry">
+        <id column="id" property="id"/>
+        <result column="group_name" property="groupName"/>
+        <result column="group_type" property="groupType"/>
+        <result column="create_user_id" property="createUserId"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, tel
+    </sql>
+
+    <select id="getAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM user_info
+    </select>
+
+    <select id="getFriednList" parameterType="Long" resultMap="BaseResultMap">
+
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM user_info
+        WHERE id IN(
+        SELECT g.`friend_id` FROM user_info i ,good_friend g
+        WHERE i.`id`=g.`user_id`
+        AND g.`user_id`=#{id})
+
+    </select>
+
+    <insert id="addGroup" parameterType="GroupEntry" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into user_group (group_name,group_type,create_user_id) values(#{groupName},#{groupType}，#{createUserId})
+    </insert>
+
+    <select id="getMyCreateGroup" parameterType="Long" resultMap="GroupResultMap">
+        select * from user_group
+        where create_user_id=#{id}
+    </select>
+
+    <select id="getMyJoinGroup" parameterType="Long" resultMap="GroupResultMap">
+        SELECT * FROM user_group
+        WHERE id IN (
+	      SELECT group_id  FROM user_group_relation
+	      WHERE use_id=#{id}
+          )
+    </select>
+
+    <select id="getGroupFreidList" parameterType="Long" resultMap="BaseResultMap">
+       SELECT  <include refid="Base_Column_List"/> FROM user_info
+        WHERE id IN(
+	      SELECT use_id FROM user_group_relation
+	      WHERE group_id=#{id}
+        )
+    </select>
+
+
+</mapper>
