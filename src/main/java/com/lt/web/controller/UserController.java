@@ -24,9 +24,9 @@ public class UserController {
 
     @ApiOperation(value = "所有用户列表", notes = "")
     @RequestMapping(value = "get_user_list",method = RequestMethod.GET)
-    public JsonResult getUserListById(){
+    public JsonResult getUserListById(UserListReq req){
 
-        return  iUserService.getUserList();
+        return  iUserService.getUserList(req);
     }
 
     @ApiOperation(value = "登录", notes = "")
