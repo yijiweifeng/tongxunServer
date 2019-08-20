@@ -147,11 +147,11 @@ public class UserServiceImpl implements IUserService {
         groupEntry.setGroupName(req.getName());
         groupEntry.setGroupType(req.getType());
         groupEntry.setCreateUserId(req.getUserId());
-        Long id = userMapperExt.addGroup(groupEntry);
-        groupEntry.setId(id);
-        if (id != null) {
+        Long result = userMapperExt.addGroup(groupEntry);
+
+        if (result != null) {
             UserGroupRelationEntry userGroupRelationEntry = new UserGroupRelationEntry();
-            userGroupRelationEntry.setGroupId(id);
+            userGroupRelationEntry.setGroupId(groupEntry.getId());
             userGroupRelationEntry.setUserId(req.getUserId());
             int insert = userGroupRelationMapper.insert(userGroupRelationEntry);
             if (insert > 0) {

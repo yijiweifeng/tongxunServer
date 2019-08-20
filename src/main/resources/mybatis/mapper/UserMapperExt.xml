@@ -38,7 +38,7 @@
     </select>
 
     <insert id="addGroup" parameterType="GroupEntry" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
-        insert into user_group (group_name,group_type,create_user_id) values(#{groupName},#{groupType}，#{createUserId})
+        insert into user_group (group_name,group_type,create_user_id) values(#{groupName},#{groupType},#{createUserId})
     </insert>
 
     <select id="getMyCreateGroup" parameterType="Long" resultMap="GroupResultMap">
