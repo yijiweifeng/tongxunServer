@@ -146,6 +146,8 @@ public class Dispatcher {
         String fromId = message.getHead().getFromId();
         String toId = message.getHead().getToId();
 
+
+
         if(memberIds!=null&&memberIds.size()>0){
 
             // 缓存消息
@@ -180,7 +182,24 @@ public class Dispatcher {
                         iUserService.addNotSendInfo(addNotSendInfoReq);
                         logger.info(id+"不在线  群发 离线缓存");
                     }else {
-                        nettyChannel.getChannel().writeAndFlush(message)
+
+
+                        MessageProtobuf.Msg.Builder sentReportMsgBuilder = MessageProtobuf.Msg.newBuilder();
+                        MessageProtobuf.Head.Builder sentReportHeadBuilder = MessageProtobuf.Head.newBuilder();
+                        sentReportHeadBuilder.setMsgContentType(message.getHead().getMsgContentType());
+
+                        sentReportHeadBuilder.setMsgId(message.getHead().getMsgId());
+                        sentReportHeadBuilder.setToId(id);
+                        // 用户id-组id
+                        sentReportHeadBuilder.setFromId(message.getHead().getFromId()+"-"+message.getHead().getToId());
+                        sentReportHeadBuilder.setMsgType(message.getHead().getMsgType());
+                        sentReportHeadBuilder.setMsgContentType(message.getHead().getMsgContentType());
+                        sentReportHeadBuilder.setTimestamp(System.currentTimeMillis());
+                        sentReportHeadBuilder.setStatusReport(1);
+                        sentReportMsgBuilder.setHead(sentReportHeadBuilder.build());
+                        sentReportMsgBuilder.setBody(message.getBody());
+
+                        nettyChannel.getChannel().writeAndFlush(sentReportMsgBuilder.build())
                                 .addListener(new GenericFutureListener<Future<? super Void>>() {
                                     @Override
                                     public void operationComplete(Future<? super Void> future) throws Exception {
@@ -188,7 +207,7 @@ public class Dispatcher {
                                             logger.info(id+"在线 转发 群发"+future.isSuccess());
                                         }else {
                                             ChannelContainer.getInstance().getActiveChannelByUserId(id)
-                                                    .getChannel().writeAndFlush(message)
+                                                    .getChannel().writeAndFlush(sentReportMsgBuilder.build())
                                                     .addListener(new GenericFutureListener<Future<? super Void>>() {
                                                         @Override
                                                         public void operationComplete(Future<? super Void> future) throws Exception {
