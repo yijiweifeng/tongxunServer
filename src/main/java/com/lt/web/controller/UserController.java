@@ -64,7 +64,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "加入群 通过群id", notes = "")
-    @RequestMapping(value = "join_group ",method = RequestMethod.POST)
+    @RequestMapping(value = "join_group",method = RequestMethod.POST)
     public JsonResult joinGroup(JoinGroupReq req){
 
         return  iUserService.joinGroup(req);
