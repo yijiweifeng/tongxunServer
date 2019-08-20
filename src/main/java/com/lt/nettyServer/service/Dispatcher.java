@@ -15,6 +15,7 @@ import com.lt.domain.service.IUserService;
 import com.lt.nettyServer.ChannelContainer;
 import com.lt.nettyServer.NettyChannel;
 import com.lt.nettyServer.bean.MessageHolder;
+import com.lt.nettyServer.group.GroupManager;
 import com.lt.nettyServer.protobuf.MessageProtobuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -23,7 +24,9 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -97,16 +100,53 @@ public class Dispatcher {
         // toId可以是群id，根据群id查找所有在线用户的id，循环遍历channel发送即可。
         String fromId = message.getHead().getFromId();
         String toId = message.getHead().getToId();
-        CommonReq req =new CommonReq();
-        req.setId(Long.parseLong(toId));
-        JsonResult groupFreidList = iUserService.getGroupFreidList(req);
-        List<UserResq> friendlist= (List<UserResq>) groupFreidList.getData();
-
         // 通知客户端发送成功 不管在线不在线
         responseClient(message, MessageType.StatusReportEnum.SUCCESS_1.getTypeCode()
                 ,MessageType.SERVER_MSG_SENT_STATUS_REPORT.getMsgType());
 
-        if(friendlist!=null&&friendlist.size()>0){
+
+        // 先在内存中找group
+        List<String> members = GroupManager.groupsQuery(toId);
+        if(members!=null){
+            // 修改讨论组最后一次活跃时间
+            GroupManager.groupTimesUpdate(toId, message.getHead().getTimestamp());
+            logger.info("内存 讨论组<" + toId + "> 修改时间戳");
+            sendGroupMessage(members,message);
+        }else {
+            // 查询数据
+            CommonReq req =new CommonReq();
+            req.setId(Long.parseLong(toId));
+            JsonResult groupFreidList = iUserService.getGroupFreidList(req);
+            List<UserResq> friendlist= (List<UserResq>) groupFreidList.getData();
+
+             if(!CollectionUtils.isEmpty(friendlist)){
+                 List<String> memberIds=new ArrayList<>();
+                 for(UserResq u:friendlist){
+                     memberIds.add(u.getId().toString());
+                 }
+                 sendGroupMessage(memberIds,message);
+             }
+
+        }
+
+
+
+
+
+
+
+
+
+
+    }
+
+    public void sendGroupMessage(List<String> memberIds,MessageProtobuf.Msg message){
+
+        // toId可以是群id，根据群id查找所有在线用户的id，循环遍历channel发送即可。
+        String fromId = message.getHead().getFromId();
+        String toId = message.getHead().getToId();
+
+        if(memberIds!=null&&memberIds.size()>0){
 
             // 缓存消息
             AddFinishSendInfoReq addFinishSendInfoReq=new AddFinishSendInfoReq();
@@ -122,33 +162,32 @@ public class Dispatcher {
             addFinishSendInfoReq.setGroupId(Long.parseLong(toId));
             iUserService.addFinishSendInfo(addFinishSendInfoReq);
 
-
-            for (UserResq u:friendlist){
-                if(!u.getId().equals(fromId)){
-                    NettyChannel nettyChannel = ChannelContainer.getInstance().getActiveChannelByUserId(u.getId()+"");
+            for (String id:memberIds){
+                if(!id.equals(fromId)){
+                    NettyChannel nettyChannel = ChannelContainer.getInstance().getActiveChannelByUserId(id);
                     if (nettyChannel==null){
                         // 离线  缓存离线消息和缓存消息库
                         AddNotSendInfoReq addNotSendInfoReq=new AddNotSendInfoReq();
                         addNotSendInfoReq.setInfoId(message.getHead().getMsgId());
                         addNotSendInfoReq.setFromId(Long.parseLong(fromId));
-                        addNotSendInfoReq.setToId(u.getId());
+                        addNotSendInfoReq.setToId(Long.parseLong(id));
                         addNotSendInfoReq.setContent(message.getBody());
                         addNotSendInfoReq.setSendTime(message.getHead().getTimestamp()+"");
                         addNotSendInfoReq.setContentType(message.getHead().getMsgType());
                         addNotSendInfoReq.setUploadUrl("/");
-                        addNotSendInfoReq.setInfoType(1);
+                        addNotSendInfoReq.setInfoType(2);
                         addNotSendInfoReq.setGroupId(Long.parseLong(toId));
                         iUserService.addNotSendInfo(addNotSendInfoReq);
-                        logger.info(u.getId()+"不在线  群发 离线缓存");
+                        logger.info(id+"不在线  群发 离线缓存");
                     }else {
                         nettyChannel.getChannel().writeAndFlush(message)
                                 .addListener(new GenericFutureListener<Future<? super Void>>() {
                                     @Override
                                     public void operationComplete(Future<? super Void> future) throws Exception {
                                         if(future.isSuccess()){
-                                            logger.info(u.getId()+"在线 转发 群发"+future.isSuccess());
+                                            logger.info(id+"在线 转发 群发"+future.isSuccess());
                                         }else {
-                                            ChannelContainer.getInstance().getActiveChannelByUserId(u.getId()+"")
+                                            ChannelContainer.getInstance().getActiveChannelByUserId(id)
                                                     .getChannel().writeAndFlush(message)
                                                     .addListener(new GenericFutureListener<Future<? super Void>>() {
                                                         @Override
@@ -156,7 +195,7 @@ public class Dispatcher {
                                                             if(future.isSuccess()){
 
                                                             }
-                                                            logger.info(u.getId()+"在线 转发 群发"+future.isSuccess());
+                                                            logger.info(id+"在线 转发 群发"+future.isSuccess());
                                                         }
                                                     });
                                         }
@@ -168,8 +207,6 @@ public class Dispatcher {
 
             }
         }
-
-
     }
 
     // 推送待接收的离线消息
