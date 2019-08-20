@@ -10,7 +10,7 @@ import com.lt.domain.req.*;
  * @date 2019/8/14 13:50
  */
 public interface IUserService {
-    public JsonResult<UserEntity> getUserList();
+    public JsonResult<UserEntity> getUserList(UserListReq req);
 
     JsonResult login(LoginReq req);
 
