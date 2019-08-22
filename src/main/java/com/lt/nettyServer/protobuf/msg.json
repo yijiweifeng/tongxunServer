@@ -1,0 +1,56 @@
+{
+  "options": {
+    "java_package": "com.freddy.im.protobuf",
+    "java_outer_classname": "MessageProtobuf"
+  },
+  "nested": {
+    "Msg": {
+      "fields": {
+        "head": {
+          "type": "Head",
+          "id": 1
+        },
+        "body": {
+          "type": "string",
+          "id": 2
+        }
+      }
+    },
+    "Head": {
+      "fields": {
+        "msgId": {
+          "type": "string",
+          "id": 1
+        },
+        "msgType": {
+          "type": "int32",
+          "id": 2
+        },
+        "msgContentType": {
+          "type": "int32",
+          "id": 3
+        },
+        "fromId": {
+          "type": "string",
+          "id": 4
+        },
+        "toId": {
+          "type": "string",
+          "id": 5
+        },
+        "timestamp": {
+          "type": "int64",
+          "id": 6
+        },
+        "statusReport": {
+          "type": "int32",
+          "id": 7
+        },
+        "extend": {
+          "type": "string",
+          "id": 8
+        }
+      }
+    }
+  }
+}
