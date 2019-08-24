@@ -107,7 +107,7 @@ public class Dispatcher {
 
         // 先在内存中找group
         List<String> members = GroupManager.groupsQuery(toId);
-        if(members!=null){
+        if(members!=null&&members.size()>0){
             // 修改讨论组最后一次活跃时间
             GroupManager.groupTimesUpdate(toId, message.getHead().getTimestamp());
             logger.info("内存 讨论组<" + toId + "> 修改时间戳");
@@ -124,6 +124,8 @@ public class Dispatcher {
                  for(UserResq u:friendlist){
                      memberIds.add(u.getId().toString());
                  }
+                 GroupManager.groupsAdd(toId, memberIds);
+                 GroupManager.groupTimesAdd(toId, System.currentTimeMillis());
                  sendGroupMessage(memberIds,message);
              }
 
