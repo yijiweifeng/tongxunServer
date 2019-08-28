@@ -72,7 +72,7 @@ public class UserServiceImpl implements IUserService {
             logger.error("账号异常" + req.getTel());
         }
         userlist.get(0).setPassword(null);
-        NettyChannel channel = ChannelContainer.getInstance().getActiveChannelByUserId(userlist.get(0).getId());
+        NettyChannel channel = ChannelContainer.getInstance().getActiveChannelByUserId(userlist.get(0).getId()+"");
         if(channel==null){
             return JsonResult.getSuccessResult(userlist.get(0), "登录成功!");
         }else {
