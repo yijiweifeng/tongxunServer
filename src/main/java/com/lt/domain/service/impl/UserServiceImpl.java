@@ -8,6 +8,8 @@ import com.lt.domain.bean.JsonResult;
 import com.lt.domain.req.*;
 import com.lt.domain.resq.UserResq;
 import com.lt.domain.service.IUserService;
+import com.lt.nettyServer.ChannelContainer;
+import com.lt.nettyServer.NettyChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -70,7 +72,13 @@ public class UserServiceImpl implements IUserService {
             logger.error("账号异常" + req.getTel());
         }
         userlist.get(0).setPassword(null);
-        return JsonResult.getSuccessResult(userlist.get(0), "登录成功!");
+        NettyChannel channel = ChannelContainer.getInstance().getActiveChannelByUserId(userlist.get(0).getId());
+        if(channel==null){
+            return JsonResult.getSuccessResult(userlist.get(0), "登录成功!");
+        }else {
+            return JsonResult.getFailResult("该账户已经登录不能再登录了!");
+        }
+
 
 
     }

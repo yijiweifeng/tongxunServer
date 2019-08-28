@@ -23,7 +23,7 @@ public class UserEntity  implements Serializable {
     @Column(name = "password")
     private String password;
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
