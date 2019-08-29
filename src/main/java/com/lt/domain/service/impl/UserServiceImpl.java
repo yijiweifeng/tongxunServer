@@ -10,6 +10,7 @@ import com.lt.domain.resq.UserResq;
 import com.lt.domain.service.IUserService;
 import com.lt.nettyServer.ChannelContainer;
 import com.lt.nettyServer.NettyChannel;
+import com.lt.nettyServer.group.GroupManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -200,6 +201,8 @@ public class UserServiceImpl implements IUserService {
         }
         int i = userGroupRelationMapper.insertSelective(userGroupRelationEntry);
         if (i > 0) {
+            // 移除该群的所有成员 ，更新重新查数据库添加到内存成员
+            GroupManager.groupRemove(req.getGroupId()+"");
             return JsonResult.getSuccessResult("加入成功");
         }
         return JsonResult.getFailResult("加入失败");
