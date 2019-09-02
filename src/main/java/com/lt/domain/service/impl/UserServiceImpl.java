@@ -96,7 +96,7 @@ public class UserServiceImpl implements IUserService {
         try {
             UserEntity userEntity = new UserEntity();
             userEntity.setName(req.getName());
-            userEntity.setTel(Long.valueOf(req.getTel()));
+            userEntity.setTel(null);
             userEntity.setPassword(req.getPassword());
             userMapper.insertSelective(userEntity);
             List<UserEntity> select = userMapper.select(userEntity);
