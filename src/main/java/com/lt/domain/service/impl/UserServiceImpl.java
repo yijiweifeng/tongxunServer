@@ -62,7 +62,7 @@ public class UserServiceImpl implements IUserService {
 
         Example example = new Example(UserEntity.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("name", Long.parseLong(req.getName()));
+        criteria.andEqualTo("name", req.getName());
         criteria.andEqualTo("password", req.getPassword());
         List<UserEntity> userlist = userMapper.selectByExample(example);
 
