@@ -15,5 +15,6 @@ import java.io.Serializable;
 public class UserListReq implements Serializable {
 
     private Long tel;
+    private String name;
 
 }

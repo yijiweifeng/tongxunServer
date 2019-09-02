@@ -51,7 +51,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     public JsonResult<UserEntity> getUserList(UserListReq req) {
         UserEntity userEntity = new UserEntity();
-        userEntity.setTel(req.getTel());
+        userEntity.setName(req.getName());
         List<UserEntity> all = userMapper.select(userEntity);
         List<UserResq> list = (mapperUtil.map(all, UserResq.class));
         return JsonResult.getSuccessResult(list, "success");
