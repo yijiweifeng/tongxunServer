@@ -7,8 +7,17 @@ import java.io.Serializable;
  * @date 2019/8/14 16:53
  */
 public class LoginReq implements Serializable {
+    private String name;
     private String password;
     private String tel;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getTel() {
         return tel;

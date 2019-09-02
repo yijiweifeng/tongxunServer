@@ -62,7 +62,7 @@ public class UserServiceImpl implements IUserService {
 
         Example example = new Example(UserEntity.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("tel", Long.parseLong(req.getTel()));
+        criteria.andEqualTo("name", Long.parseLong(req.getName()));
         criteria.andEqualTo("password", req.getPassword());
         List<UserEntity> userlist = userMapper.selectByExample(example);
 
@@ -87,10 +87,10 @@ public class UserServiceImpl implements IUserService {
     @Override
     public JsonResult regiser(RegiserReq req) {
         Example example = new Example(UserEntity.class);
-        example.createCriteria().andEqualTo("tel", req.getTel());
+        example.createCriteria().andEqualTo("name", req.getName());
         List<UserEntity> userEntities = userMapper.selectByExample(example);
         if (userEntities != null && userEntities.size() > 0) {
-            return JsonResult.getFailResult("注册失败,该手机号已经注册");
+            return JsonResult.getFailResult("注册失败,该名称已经注册");
         }
 
         try {
