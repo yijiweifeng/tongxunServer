@@ -229,6 +229,7 @@ public class UserServiceImpl implements IUserService {
 
     }
 
+    @Override
     public JsonResult addFinishSendInfo(AddFinishSendInfoReq req) {
         InfoReceivedEntity entity = mapperUtil.map(req, InfoReceivedEntity.class);
         int insert = infoReceivedMapper.insert(entity);
@@ -270,6 +271,7 @@ public class UserServiceImpl implements IUserService {
         return JsonResult.getSuccessResult(result, "获取好友历史消息成功");
     }
 
+    @Override
     public JsonResult addNotSendInfo(AddNotSendInfoReq req) {
         NotReceivedEntity entity = mapperUtil.map(req, NotReceivedEntity.class);
         int insert = notReceivedMapper.insert(entity);
@@ -279,6 +281,7 @@ public class UserServiceImpl implements IUserService {
         return JsonResult.getFailResult("缓存离线消息失败");
     }
 
+    @Override
     public void delNotReceidedInfoById(Long id) {
         notReceivedMapper.deleteByPrimaryKey(id);
     }

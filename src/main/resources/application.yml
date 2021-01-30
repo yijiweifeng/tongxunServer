@@ -7,9 +7,9 @@ spring:
   datasource:
     username: root
     password: 123456
-    url: jdbc:mysql://192.168.0.252:3306/lt_im?useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/lutao_im?useUnicode=true&characterEncoding=UTF-8
     type: com.alibaba.druid.pool.DruidDataSource
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
 mybatis:
     config-locations: classpath:mybatis/mybatis-config.xml
