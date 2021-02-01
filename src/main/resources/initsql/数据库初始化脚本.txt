@@ -1,0 +1,58 @@
+CREATE TABLE `good_friend` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) DEFAULT NULL,
+  `friend_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+CREATE TABLE `information_received` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `info_id` varchar(2000) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `sender_id` bigint(20) DEFAULT NULL,
+  `receiver` bigint(255) DEFAULT NULL,
+  `send_time` varchar(20) DEFAULT NULL,
+  `receiving_time` varchar(20) DEFAULT NULL,
+  `content` text,
+  `content_type` int(10) DEFAULT NULL,
+  `upload_url` varchar(1000) DEFAULT NULL,
+  `info_type` tinyint(2) DEFAULT NULL,
+  `group_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `not_received` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `info_id` varchar(2000) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `sender_id` bigint(20) DEFAULT NULL,
+  `receiver` bigint(255) DEFAULT NULL,
+  `send_time` varchar(20) DEFAULT NULL,
+  `content` text,
+  `content_type` int(10) DEFAULT NULL,
+  `upload_url` varchar(1000) DEFAULT NULL,
+  `info_type` tinyint(2) DEFAULT NULL,
+  `group_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `user_group` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `group_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `group_type` tinyint(2) DEFAULT NULL,
+  `create_user_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `user_group_relation` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `group_id` bigint(20) DEFAULT NULL,
+  `use_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `user_info` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) DEFAULT NULL,
+  `tel` bigint(20) DEFAULT NULL,
+  `password` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
